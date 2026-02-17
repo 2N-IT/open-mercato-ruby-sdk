@@ -1,0 +1,21 @@
+OpenMercato.configure do |config|
+  # Required: API connection
+  config.api_url         = ENV["OPEN_MERCATO_URL"]
+  config.api_key         = ENV["OPEN_MERCATO_API_KEY"]
+
+  # Required for multi-tenant: scope all requests
+  config.tenant_id       = ENV["OPEN_MERCATO_TENANT_ID"]
+  config.organization_id = ENV["OPEN_MERCATO_ORG_ID"]
+
+  # Webhook signature verification
+  config.webhook_secret  = ENV["OPEN_MERCATO_WEBHOOK_SECRET"]
+
+  # Optional settings
+  # config.timeout         = 30        # Request timeout in seconds
+  # config.open_timeout    = 10        # Connection timeout in seconds
+  # config.retry_count     = 3         # Retry on 429/5xx
+  # config.async_webhooks  = true      # Process webhooks via ActiveJob
+  # config.webhook_tolerance = 300     # Max signature age in seconds
+  # config.logger          = Rails.logger
+  # config.debug           = false     # Log request/response bodies
+end

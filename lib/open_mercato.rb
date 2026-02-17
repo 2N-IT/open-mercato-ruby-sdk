@@ -3,7 +3,8 @@ require "faraday"
 require "faraday/retry"
 require "zeitwerk"
 
-loader = Zeitwerk::Loader.for_gem
+loader = Zeitwerk::Loader.for_gem(warn_on_extra_files: false)
+loader.ignore("#{__dir__}/generators")
 loader.setup
 
 module OpenMercato

@@ -1,0 +1,35 @@
+# Open Mercato Webhook Handlers
+#
+# Register handlers for Open Mercato events.
+# Events follow the pattern: module.entity.action
+#
+# Examples:
+#   "sales.orders.created"     - exact match
+#   "sales.*"                  - all sales events
+#   "*"                        - all events
+#
+# See: https://github.com/open-mercato/ruby-sdk for full documentation
+
+# Catch-all logger (remove in production)
+OpenMercato::Webhooks::Handler.on("*") do |event|
+  Rails.logger.info "[OpenMercato] Received #{event.type} for record #{event.record_id}"
+end
+
+# Example: Handle new orders
+# OpenMercato::Webhooks::Handler.on("sales.orders.created") do |event|
+#   order_data = event.data
+#   # Sync order to your local database, send notification, etc.
+# end
+
+# Example: Handle customer updates
+# OpenMercato::Webhooks::Handler.on("customers.*") do |event|
+#   # Handle all customer-related events
+# end
+
+# Example: Class-based handler
+# class OrderSyncHandler
+#   def call(event)
+#     Order.sync_from_mercato(event.data)
+#   end
+# end
+# OpenMercato::Webhooks::Handler.on("sales.orders.created", OrderSyncHandler.new)
