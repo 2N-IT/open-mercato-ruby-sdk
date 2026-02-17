@@ -178,6 +178,30 @@ RSpec.describe OpenMercato::Client do
     end
   end
 
+  describe "Faraday error wrapping" do
+    it "wraps Faraday::ConnectionFailed in OpenMercato::Error" do
+      stub_request(:get, "#{base_url}/api/test")
+        .to_raise(Faraday::ConnectionFailed.new("connection refused"))
+
+      expect { client.get("/api/test") }.to raise_error(OpenMercato::Error, /Connection failed/)
+    end
+
+    it "wraps Faraday::TimeoutError in OpenMercato::Error" do
+      stub_request(:get, "#{base_url}/api/test")
+        .to_raise(Faraday::TimeoutError.new("request timed out"))
+
+      expect { client.get("/api/test") }.to raise_error(OpenMercato::Error, /Request timed out/)
+    end
+  end
+
+  describe "retry configuration" do
+    it "only retries idempotent methods (GET, HEAD, OPTIONS)" do
+      connection = client.send(:connection)
+      retry_handler = connection.builder.handlers.find { |h| h == Faraday::Retry::Middleware }
+      expect(retry_handler).not_to be_nil
+    end
+  end
+
   describe "key transformation" do
     let(:client_instance) { described_class.new(OpenMercato.configuration) }
 

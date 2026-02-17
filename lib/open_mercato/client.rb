@@ -29,6 +29,10 @@ module OpenMercato
       end
 
       handle_response(response)
+    rescue Faraday::ConnectionFailed => e
+      raise OpenMercato::Error, "Connection failed: #{e.message}"
+    rescue Faraday::TimeoutError => e
+      raise OpenMercato::Error, "Request timed out: #{e.message}"
     end
 
     def connection
@@ -45,7 +49,7 @@ module OpenMercato
           interval: 0.5,
           backoff_factor: 2,
           retry_statuses: [429, 502, 503, 504],
-          methods: %i[get post put delete]
+          methods: %i[get head options]
 
         conn.options.timeout = @configuration.timeout
         conn.options.open_timeout = @configuration.open_timeout

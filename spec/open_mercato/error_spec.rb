@@ -34,6 +34,28 @@ RSpec.describe OpenMercato::ServerError do
   end
 end
 
+RSpec.describe OpenMercato::WebhookSignatureError do
+  it "is an alias for Webhooks::SignatureError" do
+    expect(described_class).to eq(OpenMercato::Webhooks::SignatureError)
+  end
+
+  it "inherits from Error" do
+    expect(described_class.superclass).to eq(OpenMercato::Error)
+  end
+
+  it "can be raised and rescued as WebhookSignatureError" do
+    expect {
+      raise OpenMercato::WebhookSignatureError, "bad signature"
+    }.to raise_error(OpenMercato::WebhookSignatureError, "bad signature")
+  end
+
+  it "can be rescued as Webhooks::SignatureError" do
+    expect {
+      raise OpenMercato::WebhookSignatureError, "bad signature"
+    }.to raise_error(OpenMercato::Webhooks::SignatureError, "bad signature")
+  end
+end
+
 RSpec.describe OpenMercato::ValidationError do
   it "inherits from Error" do
     expect(described_class.superclass).to eq(OpenMercato::Error)

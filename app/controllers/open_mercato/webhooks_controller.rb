@@ -36,6 +36,7 @@ module OpenMercato
       head :bad_request
     rescue => e
       raise e if config.raise_webhook_errors
+      config.logger&.error("[OpenMercato] Webhook processing error: #{e.class}: #{e.message}")
       head :internal_server_error
     end
   end

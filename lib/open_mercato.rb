@@ -27,4 +27,16 @@ module OpenMercato
       @client ||= Client.new(configuration)
     end
   end
+
+  # Alias for design doc compatibility.
+  # Lazily resolved on first access since Webhooks::SignatureError is a secondary
+  # constant in webhooks/signature.rb and may not be autoloaded by Zeitwerk yet.
+  def self.const_missing(name)
+    if name == :WebhookSignatureError
+      require_relative "open_mercato/webhooks/signature"
+      const_set(:WebhookSignatureError, Webhooks::SignatureError)
+    else
+      super
+    end
+  end
 end

@@ -10,7 +10,8 @@ RSpec.describe "Sales resources" do
     OpenMercato::Resources::Sales::Channel => "/api/sales/channels",
     OpenMercato::Resources::Sales::ShippingMethod => "/api/sales/shipping-methods",
     OpenMercato::Resources::Sales::PaymentMethod => "/api/sales/payment-methods",
-    OpenMercato::Resources::Sales::TaxRate => "/api/sales/tax-rates"
+    OpenMercato::Resources::Sales::TaxRate => "/api/sales/tax-rates",
+    OpenMercato::Resources::Sales::Invoice => "/api/sales/invoices"
   }.each do |klass, expected_path|
     describe klass.name do
       it "has api_path #{expected_path}" do
