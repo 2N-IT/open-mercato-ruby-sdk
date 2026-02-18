@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module OpenMercato
   class Collection
     include Enumerable
@@ -12,7 +14,7 @@ module OpenMercato
       @total_pages = response["totalPages"] || 1
     end
 
-    def each(&block) = items.each(&block)
+    def each(&) = items.each(&)
     def next_page? = page < total_pages
     def prev_page? = page > 1
   end

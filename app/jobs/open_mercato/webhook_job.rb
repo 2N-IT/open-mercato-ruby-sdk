@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module OpenMercato
   class WebhookJob < ActiveJob::Base
     queue_as :open_mercato_webhooks

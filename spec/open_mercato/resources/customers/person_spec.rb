@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
 RSpec.describe OpenMercato::Resources::Customers::Person do
@@ -27,7 +29,8 @@ RSpec.describe OpenMercato::Resources::Customers::Person do
     stub_request(:get, "#{base_url}/api/customers/people")
       .to_return(
         status: 200,
-        body: { items: [{ id: "1", firstName: "Jane", lastName: "Doe" }], total: 1, page: 1, pageSize: 25, totalPages: 1 }.to_json,
+        body: { items: [{ id: "1", firstName: "Jane", lastName: "Doe" }], total: 1, page: 1, pageSize: 25,
+                totalPages: 1 }.to_json,
         headers: { "Content-Type" => "application/json" }
       )
     people = described_class.list

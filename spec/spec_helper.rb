@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require "open_mercato"
 require "webmock/rspec"
 
 WebMock.disable_net_connect!
 
 RSpec.configure do |config|
-  config.before(:each) do
+  config.before do
     OpenMercato.reset!
     OpenMercato.configure do |c|
       c.api_url = "https://test.open-mercato.local"

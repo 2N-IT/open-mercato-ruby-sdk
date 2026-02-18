@@ -3,4 +3,4 @@
 Gemfile.lock
 pkg/
 spec/reports/
-tmp/
+tmp//thoughts/

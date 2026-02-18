@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe OpenMercato::Configuration do
   describe "defaults" do
     subject(:config) { described_class.new }
@@ -56,6 +58,8 @@ RSpec.describe OpenMercato::Configuration do
   end
 
   describe "ENV reading" do
+    subject(:config) { described_class.new }
+
     before do
       ENV["OPEN_MERCATO_URL"] = "https://env.example.com"
       ENV["OPEN_MERCATO_API_KEY"] = "omk_env_key"
@@ -71,8 +75,6 @@ RSpec.describe OpenMercato::Configuration do
       ENV.delete("OPEN_MERCATO_ORG_ID")
       ENV.delete("OPEN_MERCATO_WEBHOOK_SECRET")
     end
-
-    subject(:config) { described_class.new }
 
     it "reads api_url from ENV" do
       expect(config.api_url).to eq("https://env.example.com")

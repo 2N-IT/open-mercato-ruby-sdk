@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe OpenMercato::Resource do
   let(:base_url) { "https://test.open-mercato.local" }
 

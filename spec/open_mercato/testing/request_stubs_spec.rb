@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 require "open_mercato/testing"
 
@@ -46,9 +48,9 @@ RSpec.describe OpenMercato::Testing::RequestStubs do
     it "stubs an error response" do
       stub_mercato_error("/api/catalog/products", status: 400, message: "Invalid")
 
-      expect {
+      expect do
         OpenMercato::Resources::Catalog::Product.list
-      }.to raise_error(OpenMercato::Error)
+      end.to raise_error(OpenMercato::Error)
     end
   end
 end
