@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module OpenMercato
   module Resources
     module Auth

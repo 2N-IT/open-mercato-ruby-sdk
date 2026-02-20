@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module OpenMercato
   class Error < StandardError; end
   class AuthenticationError < Error; end
@@ -27,6 +29,7 @@ module OpenMercato
 
     def build_message
       return "Validation failed" if field_errors.empty?
+
       errors = field_errors.map { |field, msgs| "#{field}: #{Array(msgs).join(', ')}" }
       "Validation failed: #{errors.join('; ')}"
     end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 require "active_job"
 require_relative "../../app/jobs/open_mercato/webhook_job"

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 require "open_mercato/testing"
 
@@ -28,13 +30,13 @@ RSpec.describe OpenMercato::Testing::WebhookHelpers do
       expect(result[:headers]["Content-Type"]).to eq("application/json")
 
       # Verify signature is actually valid
-      expect {
+      expect do
         OpenMercato::Webhooks::Signature.verify!(
           payload: result[:payload],
           signature: result[:headers]["X-OpenMercato-Signature"],
           secret: OpenMercato.configuration.webhook_secret
         )
-      }.not_to raise_error
+      end.not_to raise_error
     end
   end
 end

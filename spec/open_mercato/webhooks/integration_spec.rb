@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
 RSpec.describe "Webhook flow integration" do
@@ -19,13 +21,13 @@ RSpec.describe "Webhook flow integration" do
     )
 
     # Verify signature
-    expect {
+    expect do
       OpenMercato::Webhooks::Signature.verify!(
         payload: payload,
         signature: "t=#{timestamp},v1=#{sig}",
         secret: secret
       )
-    }.not_to raise_error
+    end.not_to raise_error
 
     # Parse event
     parsed = JSON.parse(payload)
@@ -55,12 +57,12 @@ RSpec.describe "Webhook flow integration" do
     )
 
     tampered = '{"event":"hacked"}'
-    expect {
+    expect do
       OpenMercato::Webhooks::Signature.verify!(
         payload: tampered,
         signature: "t=#{timestamp},v1=#{sig}",
         secret: secret
       )
-    }.to raise_error(OpenMercato::Webhooks::SignatureError)
+    end.to raise_error(OpenMercato::Webhooks::SignatureError)
   end
 end

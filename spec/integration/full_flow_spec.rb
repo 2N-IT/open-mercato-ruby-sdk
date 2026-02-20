@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 require "open_mercato/testing"
 
@@ -11,8 +13,8 @@ RSpec.describe "Full API flow integration" do
     it "lists, creates, updates, and deletes a product" do
       # List
       stub_mercato_list("/api/catalog/products",
-        items: [OpenMercato::Testing::FakeResponses.product("title" => "Laptop")],
-        "total" => 1)
+                        items: [OpenMercato::Testing::FakeResponses.product("title" => "Laptop")],
+                        "total" => 1)
 
       products = OpenMercato::Resources::Catalog::Product.list
       expect(products.total).to eq(1)
@@ -91,7 +93,8 @@ RSpec.describe "Full API flow integration" do
       OpenMercato::Webhooks::Handler.on("sales.orders.created") { |e| received_events << e }
       OpenMercato::Webhooks::Handler.on("sales.*") { |e| received_events << e }
 
-      event = simulate_mercato_webhook("sales.orders.created", data: { "id" => "order-123", "orderNumber" => "ORD-001" })
+      event = simulate_mercato_webhook("sales.orders.created",
+                                       data: { "id" => "order-123", "orderNumber" => "ORD-001" })
 
       expect(received_events.size).to eq(2)
       expect(received_events.first.record_id).to eq("order-123")
@@ -101,21 +104,22 @@ RSpec.describe "Full API flow integration" do
     it "generates and verifies signed webhook requests" do
       request = signed_mercato_webhook_request("test.event", data: { "id" => "abc" })
 
-      expect {
+      expect do
         OpenMercato::Webhooks::Signature.verify!(
           payload: request[:payload],
           signature: request[:headers]["X-OpenMercato-Signature"],
           secret: OpenMercato.configuration.webhook_secret
         )
-      }.not_to raise_error
+      end.not_to raise_error
     end
   end
 
   describe "Search" do
     it "performs search and global search" do
+      search_response = '{"items":[{"id":"1","title":"Laptop"}],"total":1}'
       stub_request(:get, "#{base_url}/api/search/search")
         .with(query: hash_including("q" => "laptop"))
-        .to_return(status: 200, body: '{"items":[{"id":"1","title":"Laptop"}],"total":1}', headers: { "Content-Type" => "application/json" })
+        .to_return(status: 200, body: search_response, headers: { "Content-Type" => "application/json" })
 
       results = OpenMercato::Resources::Search::Query.search("laptop")
       expect(results["items"].first["title"]).to eq("Laptop")
@@ -150,13 +154,13 @@ RSpec.describe "Full API flow integration" do
   describe "Error handling" do
     it "raises ValidationError with field errors" do
       stub_mercato_error("/api/catalog/products",
-        status: 400,
-        message: "Validation failed",
-        field_errors: { "title" => ["can't be blank"] })
+                         status: 400,
+                         message: "Validation failed",
+                         field_errors: { "title" => ["can't be blank"] })
 
-      expect {
+      expect do
         OpenMercato::Resources::Catalog::Product.create(title: "")
-      }.to raise_error(OpenMercato::ValidationError) { |e|
+      end.to raise_error(OpenMercato::ValidationError) { |e|
         expect(e.field_errors["title"]).to include("can't be blank")
       }
     end
@@ -165,9 +169,9 @@ RSpec.describe "Full API flow integration" do
       stub_request(:get, "#{base_url}/api/catalog/products/missing")
         .to_return(status: 404, body: '{"error":"Not found"}', headers: { "Content-Type" => "application/json" })
 
-      expect {
+      expect do
         OpenMercato::Resources::Catalog::Product.find("missing")
-      }.to raise_error(OpenMercato::NotFoundError)
+      end.to raise_error(OpenMercato::NotFoundError)
     end
   end
 end

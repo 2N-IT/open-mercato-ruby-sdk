@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module OpenMercato
   class Client
     def initialize(configuration)
@@ -45,11 +47,11 @@ module OpenMercato
         conn.headers["User-Agent"] = "open_mercato-ruby/#{OpenMercato::VERSION}"
 
         conn.request :retry,
-          max: @configuration.retry_count,
-          interval: 0.5,
-          backoff_factor: 2,
-          retry_statuses: [429, 502, 503, 504],
-          methods: %i[get head options]
+                     max: @configuration.retry_count,
+                     interval: 0.5,
+                     backoff_factor: 2,
+                     retry_statuses: [429, 502, 503, 504],
+                     methods: %i[get head options]
 
         conn.options.timeout = @configuration.timeout
         conn.options.open_timeout = @configuration.open_timeout
@@ -83,11 +85,13 @@ module OpenMercato
 
     def error_message(body, default)
       return default unless body.is_a?(Hash)
+
       body["error"] || body["message"] || default
     end
 
     def parse_json(body)
       return {} if body.nil? || body.to_s.empty?
+
       JSON.parse(body)
     rescue JSON::ParserError
       {}
@@ -97,13 +101,17 @@ module OpenMercato
       case obj
       when Hash
         obj.each_with_object({}) do |(key, value), result|
-          camel_key = key.to_s.gsub(/_([a-z])/) { $1.upcase }
+          camel_key = key.to_s.gsub(/_([a-z])/) { ::Regexp.last_match(1).upcase }
           result[camel_key] = transform_keys(value)
         end
       when Array
         obj.map { |item| transform_keys(item) }
       else
-        obj
+        case obj
+        when "true"  then true
+        when "false" then false
+        else obj
+        end
       end
     end
   end

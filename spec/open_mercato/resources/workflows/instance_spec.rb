@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
 RSpec.describe OpenMercato::Resources::Workflows::Instance do
@@ -30,6 +32,35 @@ RSpec.describe OpenMercato::Resources::Workflows::Instance do
         )
       result = described_class.signal("wf-1", "approve", comment: "Looks good")
       expect(result["success"]).to be true
+    end
+  end
+
+  describe ".advance" do
+    it "advances a workflow instance to the next step" do
+      stub_request(:post, "#{base_url}/api/workflows/instances/wf-1/advance")
+        .to_return(
+          status: 200,
+          body: { data: { instance: { id: "wf-1", status: "running" } },
+                  message: "Workflow advanced successfully" }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+
+      result = described_class.advance("wf-1")
+      expect(result["message"]).to eq("Workflow advanced successfully")
+    end
+
+    it "advances to a specific step with context updates" do
+      stub_request(:post, "#{base_url}/api/workflows/instances/wf-1/advance")
+        .to_return(
+          status: 200,
+          body: { data: { instance: { id: "wf-1", currentStepId: "review" } },
+                  message: "Workflow advanced successfully" }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+
+      result = described_class.advance("wf-1", to_step_id: "review",
+                                               context_updates: { approved: true })
+      expect(result["data"]["instance"]["currentStepId"]).to eq("review")
     end
   end
 end

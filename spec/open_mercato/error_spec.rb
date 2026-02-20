@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe OpenMercato::Error do
   it "inherits from StandardError" do
     expect(described_class.superclass).to eq(StandardError)
@@ -44,15 +46,15 @@ RSpec.describe OpenMercato::WebhookSignatureError do
   end
 
   it "can be raised and rescued as WebhookSignatureError" do
-    expect {
-      raise OpenMercato::WebhookSignatureError, "bad signature"
-    }.to raise_error(OpenMercato::WebhookSignatureError, "bad signature")
+    expect do
+      raise described_class, "bad signature"
+    end.to raise_error(described_class, "bad signature")
   end
 
   it "can be rescued as Webhooks::SignatureError" do
-    expect {
-      raise OpenMercato::WebhookSignatureError, "bad signature"
-    }.to raise_error(OpenMercato::Webhooks::SignatureError, "bad signature")
+    expect do
+      raise described_class, "bad signature"
+    end.to raise_error(OpenMercato::Webhooks::SignatureError, "bad signature")
   end
 end
 

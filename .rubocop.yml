@@ -1,0 +1,82 @@
+plugins:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-performance
+
+AllCops:
+  TargetRubyVersion: 3.1
+  NewCops: enable
+  Exclude:
+    - "vendor/**/*"
+    - "tmp/**/*"
+    - "*.gemspec"
+
+# Frozen string literal required in all files
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+# YARD documentation is out of scope for this project
+Style/Documentation:
+  Enabled: false
+
+# Existing complex methods are not being refactored in this plan
+Metrics/AbcSize:
+  Max: 35
+
+Metrics/MethodLength:
+  Max: 35
+
+Metrics/CyclomaticComplexity:
+  Max: 12
+
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+
+# RSpec configuration
+RSpec/ExampleLength:
+  Max: 35
+
+# Some examples test multiple attributes of a resource — intentional
+RSpec/MultipleExpectations:
+  Max: 15
+
+# Integration and scenario specs describe flows, not classes
+RSpec/DescribeClass:
+  Exclude:
+    - "spec/integration/**/*"
+    - "spec/open_mercato/webhooks/integration_spec.rb"
+    - "spec/generators/**/*"
+    - "spec/open_mercato/resources/**/all_resources_spec.rb"
+
+# Tests using stub_request + raise_error or not_to raise_error are valid
+RSpec/NoExpectationExample:
+  Enabled: false
+
+# Multiple top-level describes in error_spec.rb is acceptable
+RSpec/MultipleDescribes:
+  Enabled: false
+
+# Normal doubles are acceptable in this codebase
+RSpec/VerifiedDoubles:
+  Enabled: false
+
+# Message expectation style — existing tests use expect(...).to receive
+RSpec/MessageSpies:
+  Enabled: false
+
+# verify! is a standard Ruby convention for bang-verification methods
+Naming/PredicateMethod:
+  Enabled: false
+
+# Gems use ActiveJob::Base and ActionController::Base directly — ApplicationJob/ApplicationController
+# are host-app constructs not available in the gem's own test environment
+Rails/ApplicationJob:
+  Enabled: false
+
+Rails/ApplicationController:
+  Enabled: false

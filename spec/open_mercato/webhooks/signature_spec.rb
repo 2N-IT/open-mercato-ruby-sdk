@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
 RSpec.describe OpenMercato::Webhooks::Signature do
@@ -12,8 +14,8 @@ RSpec.describe OpenMercato::Webhooks::Signature do
     end
 
     it "produces consistent results" do
-      a = described_class.compute(timestamp: 12345, payload: "test", secret: "key")
-      b = described_class.compute(timestamp: 12345, payload: "test", secret: "key")
+      a = described_class.compute(timestamp: 12_345, payload: "test", secret: "key")
+      b = described_class.compute(timestamp: 12_345, payload: "test", secret: "key")
       expect(a).to eq(b)
     end
   end
@@ -23,33 +25,34 @@ RSpec.describe OpenMercato::Webhooks::Signature do
     let(:header) { "t=#{timestamp},v1=#{sig}" }
 
     it "passes for valid signature" do
-      expect {
+      expect do
         described_class.verify!(payload: payload, signature: header, secret: secret)
-      }.not_to raise_error
+      end.not_to raise_error
     end
 
     it "raises for missing signature" do
-      expect {
+      expect do
         described_class.verify!(payload: payload, signature: nil, secret: secret)
-      }.to raise_error(OpenMercato::Webhooks::SignatureError, /No signature/)
+      end.to raise_error(OpenMercato::Webhooks::SignatureError, /No signature/)
     end
 
     it "raises for empty signature" do
-      expect {
+      expect do
         described_class.verify!(payload: payload, signature: "", secret: secret)
-      }.to raise_error(OpenMercato::Webhooks::SignatureError, /No signature/)
+      end.to raise_error(OpenMercato::Webhooks::SignatureError, /No signature/)
     end
 
     it "raises for missing secret" do
-      expect {
+      expect do
         described_class.verify!(payload: payload, signature: header, secret: nil)
-      }.to raise_error(OpenMercato::Webhooks::SignatureError, /No webhook secret/)
+      end.to raise_error(OpenMercato::Webhooks::SignatureError, /No webhook secret/)
     end
 
     it "raises for invalid signature" do
-      expect {
-        described_class.verify!(payload: payload, signature: "t=#{timestamp},v1=invalid_hex_that_is_exactly_sixty_four_characters_long_padding_", secret: secret)
-      }.to raise_error(OpenMercato::Webhooks::SignatureError, /mismatch/)
+      invalid_sig = "t=#{timestamp},v1=invalid_hex_that_is_exactly_sixty_four_characters_long_padding_"
+      expect do
+        described_class.verify!(payload: payload, signature: invalid_sig, secret: secret)
+      end.to raise_error(OpenMercato::Webhooks::SignatureError, /mismatch/)
     end
 
     it "raises for expired timestamp" do
@@ -57,9 +60,9 @@ RSpec.describe OpenMercato::Webhooks::Signature do
       old_sig = described_class.compute(timestamp: old_ts, payload: payload, secret: secret)
       old_header = "t=#{old_ts},v1=#{old_sig}"
 
-      expect {
+      expect do
         described_class.verify!(payload: payload, signature: old_header, secret: secret, tolerance: 300)
-      }.to raise_error(OpenMercato::Webhooks::SignatureError, /too old/)
+      end.to raise_error(OpenMercato::Webhooks::SignatureError, /too old/)
     end
 
     it "passes when no tolerance set" do
@@ -67,9 +70,9 @@ RSpec.describe OpenMercato::Webhooks::Signature do
       old_sig = described_class.compute(timestamp: old_ts, payload: payload, secret: secret)
       old_header = "t=#{old_ts},v1=#{old_sig}"
 
-      expect {
+      expect do
         described_class.verify!(payload: payload, signature: old_header, secret: secret, tolerance: nil)
-      }.not_to raise_error
+      end.not_to raise_error
     end
   end
 end

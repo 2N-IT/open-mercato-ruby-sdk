@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "openssl"
 
 module OpenMercato
@@ -12,15 +14,13 @@ module OpenMercato
         end
 
         def verify!(payload:, signature:, secret:, tolerance: nil)
-          raise SignatureError, "No signature provided" if signature.nil? || signature.empty?
-          raise SignatureError, "No webhook secret configured" if secret.nil? || secret.empty?
+          raise SignatureError, "No signature provided" if signature.blank?
+          raise SignatureError, "No webhook secret configured" if secret.blank?
 
           timestamp, received_sig = parse_header(signature)
           expected_sig = compute(timestamp: timestamp, payload: payload, secret: secret)
 
-          unless secure_compare(expected_sig, received_sig)
-            raise SignatureError, "Signature mismatch"
-          end
+          raise SignatureError, "Signature mismatch" unless secure_compare(expected_sig, received_sig)
 
           if tolerance && (Time.now.to_i - timestamp.to_i) > tolerance
             raise SignatureError, "Timestamp too old (older than #{tolerance}s)"
@@ -44,9 +44,10 @@ module OpenMercato
           [timestamp, sig]
         end
 
-        def secure_compare(a, b)
-          return false unless a.bytesize == b.bytesize
-          OpenSSL.fixed_length_secure_compare(a, b)
+        def secure_compare(str_a, str_b)
+          return false unless str_a.bytesize == str_b.bytesize
+
+          OpenSSL.fixed_length_secure_compare(str_a, str_b)
         end
       end
     end

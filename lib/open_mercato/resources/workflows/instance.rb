@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module OpenMercato
   module Resources
     module Workflows
@@ -16,6 +18,12 @@ module OpenMercato
         class << self
           def signal(id, signal_name, payload = {})
             OpenMercato.client.post("#{api_path}/#{id}/signal", { signal: signal_name }.merge(payload))
+          end
+
+          def advance(id, to_step_id: nil, trigger_data: {}, context_updates: {})
+            payload = { triggerData: trigger_data, contextUpdates: context_updates }
+            payload[:toStepId] = to_step_id if to_step_id
+            OpenMercato.client.post("#{api_path}/#{id}/advance", payload)
           end
         end
       end

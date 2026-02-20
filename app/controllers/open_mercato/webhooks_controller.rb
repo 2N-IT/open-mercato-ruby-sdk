@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module OpenMercato
   class WebhooksController < ActionController::Base
     skip_before_action :verify_authenticity_token
@@ -30,12 +32,13 @@ module OpenMercato
       end
 
       head :ok
-    rescue Webhooks::SignatureError => e
+    rescue Webhooks::SignatureError
       head :unauthorized
     rescue JSON::ParserError
       head :bad_request
-    rescue => e
+    rescue StandardError => e
       raise e if config.raise_webhook_errors
+
       config.logger&.error("[OpenMercato] Webhook processing error: #{e.class}: #{e.message}")
       head :internal_server_error
     end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe OpenMercato::Client do
   let(:client) { OpenMercato.client }
   let(:base_url) { "https://test.open-mercato.local" }
@@ -51,7 +53,7 @@ RSpec.describe OpenMercato::Client do
     it "transforms snake_case params to camelCase" do
       stub_request(:get, "#{base_url}/api/items")
         .with(query: { "pageSize" => "25", "sortBy" => "name" })
-        .to_return(status: 200, body: '{}')
+        .to_return(status: 200, body: "{}")
 
       client.get("/api/items", page_size: 25, sort_by: "name")
     end
@@ -70,7 +72,7 @@ RSpec.describe OpenMercato::Client do
     it "transforms snake_case keys to camelCase in body" do
       stub_request(:post, "#{base_url}/api/items")
         .with(body: '{"displayName":"Test","isActive":true}')
-        .to_return(status: 200, body: '{}')
+        .to_return(status: 200, body: "{}")
 
       client.post("/api/items", display_name: "Test", is_active: true)
     end
@@ -78,7 +80,7 @@ RSpec.describe OpenMercato::Client do
     it "transforms nested keys" do
       stub_request(:post, "#{base_url}/api/items")
         .with(body: '{"lineItems":[{"unitPrice":10}]}')
-        .to_return(status: 200, body: '{}')
+        .to_return(status: 200, body: "{}")
 
       client.post("/api/items", line_items: [{ unit_price: 10 }])
     end
@@ -143,7 +145,7 @@ RSpec.describe OpenMercato::Client do
 
     it "raises RateLimitError on 429" do
       stub_request(:get, "#{base_url}/api/test")
-        .to_return(status: 429, body: '{}')
+        .to_return(status: 429, body: "{}")
 
       expect { client.get("/api/test") }.to raise_error(OpenMercato::RateLimitError)
     end
@@ -157,21 +159,21 @@ RSpec.describe OpenMercato::Client do
 
     it "raises ServerError on 502" do
       stub_request(:get, "#{base_url}/api/test")
-        .to_return(status: 502, body: '')
+        .to_return(status: 502, body: "")
 
       expect { client.get("/api/test") }.to raise_error(OpenMercato::ServerError)
     end
 
     it "handles non-JSON error responses" do
       stub_request(:get, "#{base_url}/api/test")
-        .to_return(status: 400, body: 'Not JSON')
+        .to_return(status: 400, body: "Not JSON")
 
       expect { client.get("/api/test") }.to raise_error(OpenMercato::ValidationError)
     end
 
     it "handles empty body on success" do
       stub_request(:get, "#{base_url}/api/test")
-        .to_return(status: 200, body: '')
+        .to_return(status: 200, body: "")
 
       result = client.get("/api/test")
       expect(result).to eq({})

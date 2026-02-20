@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
 RSpec.describe OpenMercato::Webhooks::Handler do
@@ -37,7 +39,7 @@ RSpec.describe OpenMercato::Webhooks::Handler do
     described_class.on("test.event") { results << :b }
 
     described_class.dispatch(OpenMercato::Webhooks::Event.new(type: "test.event", data: {}))
-    expect(results).to eq([:a, :b])
+    expect(results).to eq(%i[a b])
   end
 
   it "accepts callable objects" do

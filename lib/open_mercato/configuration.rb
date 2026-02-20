@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module OpenMercato
   class Configuration
     attr_accessor :api_url, :api_key, :tenant_id, :organization_id,
@@ -7,11 +9,11 @@ module OpenMercato
                   :async_webhooks, :raise_webhook_errors
 
     def initialize
-      @api_url = ENV["OPEN_MERCATO_URL"]
-      @api_key = ENV["OPEN_MERCATO_API_KEY"]
-      @tenant_id = ENV["OPEN_MERCATO_TENANT_ID"]
-      @organization_id = ENV["OPEN_MERCATO_ORG_ID"]
-      @webhook_secret = ENV["OPEN_MERCATO_WEBHOOK_SECRET"]
+      @api_url = ENV.fetch("OPEN_MERCATO_URL", nil)
+      @api_key = ENV.fetch("OPEN_MERCATO_API_KEY", nil)
+      @tenant_id = ENV.fetch("OPEN_MERCATO_TENANT_ID", nil)
+      @organization_id = ENV.fetch("OPEN_MERCATO_ORG_ID", nil)
+      @webhook_secret = ENV.fetch("OPEN_MERCATO_WEBHOOK_SECRET", nil)
       @webhook_tolerance = 300
       @timeout = 30
       @open_timeout = 10

@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require "securerandom"
 
 module OpenMercato
   module Testing
-    module FakeResponses
+    module FakeResponses # rubocop:disable Metrics/ModuleLength
       module_function
 
       def product(overrides = {})
@@ -57,6 +59,79 @@ module OpenMercato
           "total" => "110.00",
           "createdAt" => Time.now.iso8601,
           "updatedAt" => Time.now.iso8601
+        }.merge(overrides)
+      end
+
+      def workflow_task(overrides = {})
+        {
+          "id" => SecureRandom.uuid,
+          "title" => "Review order",
+          "description" => "Please review and approve the order",
+          "status" => "PENDING",
+          "assignedTo" => SecureRandom.uuid,
+          "workflowInstanceId" => SecureRandom.uuid,
+          "dueDate" => Time.now.iso8601,
+          "createdAt" => Time.now.iso8601,
+          "updatedAt" => Time.now.iso8601
+        }.merge(overrides)
+      end
+
+      def translation(overrides = {})
+        {
+          "entityType" => "products",
+          "entityId" => SecureRandom.uuid,
+          "translations" => { "en" => { "title" => "Product" }, "pl" => { "title" => "Produkt" } },
+          "createdAt" => Time.now.iso8601,
+          "updatedAt" => Time.now.iso8601
+        }.merge(overrides)
+      end
+
+      def attachment_library_item(overrides = {})
+        {
+          "id" => SecureRandom.uuid,
+          "fileName" => "document.pdf",
+          "fileSize" => 102_400,
+          "mimeType" => "application/pdf",
+          "partitionCode" => "default",
+          "partitionTitle" => "Default",
+          "url" => "https://cdn.example.com/document.pdf",
+          "thumbnailUrl" => nil,
+          "tags" => [],
+          "content" => nil,
+          "createdAt" => Time.now.iso8601
+        }.merge(overrides)
+      end
+
+      def sales_widget_order(overrides = {})
+        {
+          "id" => SecureRandom.uuid,
+          "orderNumber" => "ORD-#{rand(1000..9999)}",
+          "status" => "pending",
+          "fulfillmentStatus" => "unfulfilled",
+          "paymentStatus" => "unpaid",
+          "customerName" => "John Doe",
+          "customerEntityId" => SecureRandom.uuid,
+          "netAmount" => "100.00",
+          "grossAmount" => "123.00",
+          "currency" => "USD",
+          "createdAt" => Time.now.iso8601
+        }.merge(overrides)
+      end
+
+      def sales_widget_quote(overrides = {})
+        {
+          "id" => SecureRandom.uuid,
+          "quoteNumber" => "QUO-#{rand(1000..9999)}",
+          "status" => "draft",
+          "customerName" => "Jane Smith",
+          "customerEntityId" => SecureRandom.uuid,
+          "validFrom" => Time.now.iso8601,
+          "validUntil" => Time.now.iso8601,
+          "netAmount" => "500.00",
+          "grossAmount" => "615.00",
+          "currency" => "USD",
+          "convertedOrderId" => nil,
+          "createdAt" => Time.now.iso8601
         }.merge(overrides)
       end
 

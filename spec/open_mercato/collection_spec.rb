@@ -1,4 +1,8 @@
+# frozen_string_literal: true
+
 RSpec.describe OpenMercato::Collection do
+  subject(:collection) { described_class.new(response, resource_class) }
+
   let(:resource_class) do
     Class.new(OpenMercato::Resource) do
       attribute :id, :string
@@ -18,8 +22,6 @@ RSpec.describe OpenMercato::Collection do
       "totalPages" => 2
     }
   end
-
-  subject(:collection) { described_class.new(response, resource_class) }
 
   describe "#items" do
     it "maps response items to resource instances" do
