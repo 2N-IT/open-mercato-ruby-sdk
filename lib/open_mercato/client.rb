@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/string/inflections"
+
 module OpenMercato
   class Client
     def initialize(configuration)
@@ -101,7 +103,7 @@ module OpenMercato
       case obj
       when Hash
         obj.each_with_object({}) do |(key, value), result|
-          camel_key = key.to_s.gsub(/_([a-z])/) { ::Regexp.last_match(1).upcase }
+          camel_key = key.to_s.camelize(:lower)
           result[camel_key] = transform_keys(value)
         end
       when Array

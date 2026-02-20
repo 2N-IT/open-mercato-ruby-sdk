@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_model"
+require "active_support/core_ext/string/inflections"
 
 module OpenMercato
   class Resource
@@ -47,7 +48,7 @@ module OpenMercato
 
     def initialize(attributes = {})
       sanitized = attributes.each_with_object({}) do |(key, value), hash|
-        snake_key = key.to_s.gsub(/([A-Z])/) { "_#{::Regexp.last_match(1).downcase}" }.to_sym
+        snake_key = key.to_s.underscore.to_sym
         hash[snake_key] = value if self.class.attribute_names.include?(snake_key.to_s)
       end
       super(sanitized)
