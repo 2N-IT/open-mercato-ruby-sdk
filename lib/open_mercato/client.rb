@@ -107,7 +107,11 @@ module OpenMercato
       when Array
         obj.map { |item| transform_keys(item) }
       else
-        obj
+        case obj
+        when "true"  then true
+        when "false" then false
+        else obj
+        end
       end
     end
   end
