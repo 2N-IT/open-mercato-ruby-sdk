@@ -11,6 +11,50 @@ Full-featured Ruby gem for integrating Rails applications with the [Open Mercato
 - **Testing helpers** for WebMock stubs and webhook simulation
 - **Install generator** for quick Rails setup
 
+## When to Use This Gem
+
+This gem is built for **Rails applications that integrate with Open Mercato as an external service** — whether Open Mercato runs in the cloud, on-premise, or as a separate container in your infrastructure.
+
+### Common integration patterns
+
+**Connecting an existing Rails app to Open Mercato**
+
+Your company already runs a Rails application (e-commerce, customer portal, internal tool) and wants to add Open Mercato as the business engine without rewriting anything. This gem gives you a ready-made HTTP client with typed Ruby objects, error handling, and retry logic — wire it up and start calling the API.
+
+```ruby
+# Your existing Spree / Solidus store creates an order in Open Mercato
+def after_order_complete(order)
+  OpenMercato::Resources::Sales::Order.create(
+    channel_id:     ENV["MERCATO_CHANNEL_ID"],
+    customer_email: order.email,
+    lines:          order.line_items.map { |li| { sku: li.sku, qty: li.quantity } }
+  )
+end
+```
+
+**Using Open Mercato as an Order Management System (OMS)**
+
+Your Rails storefront handles the customer experience; Open Mercato handles fulfillment, inventory, and workflows. The gem bridges the two: orders flow in via API calls, status changes flow back via webhooks.
+
+```
+Rails (Spree/Solidus)  →  gem calls Sales::Order.create(...)  →  Open Mercato OMS
+                       ←  webhook: sales.orders.shipped        ←
+```
+
+**Multi-tenant SaaS with per-tenant Open Mercato instances**
+
+Reconfigure the client per request to route API calls to the correct tenant instance — useful when each customer gets their own isolated Open Mercato environment.
+
+**Receiving real-time events in Rails**
+
+Mount the built-in webhook engine and react to any Open Mercato event (order placed, payment received, workflow completed) directly in your Rails app, with HMAC signature verification handled automatically.
+
+```ruby
+OpenMercato::Webhooks::Handler.on("sales.orders.shipped") do |event|
+  ShipmentNotifier.with(order_id: event.record_id).deliver_later
+end
+```
+
 ## Requirements
 
 - Ruby >= 3.1
@@ -45,7 +89,7 @@ OpenMercato.configure do |config|
   config.api_key         = ENV["OPEN_MERCATO_API_KEY"]
   config.tenant_id       = ENV["OPEN_MERCATO_TENANT_ID"]
   config.organization_id = ENV["OPEN_MERCATO_ORG_ID"]
-  config.webhook_secret  = ENV["OPEN_MERCATO_WEBHOOK_SECRET"]
+  config.webhook_secret  = ENV["OPEN_MERCATO_WEBHOOK_SECRET"]  # see Webhooks section
 
   # Optional
   config.timeout         = 30     # Request timeout (seconds)
@@ -202,7 +246,29 @@ OpenMercato::Webhooks::Handler.on("sales.orders.created", OrderSyncHandler.new)
 
 The engine mounts at `/open_mercato/webhooks` (POST).
 
-Signature format: `X-OpenMercato-Signature: t=<timestamp>,v1=<hmac-sha256>`
+Expected signature format: `X-OpenMercato-Signature: t=<timestamp>,v1=<hmac-sha256>`
+
+### About `webhook_secret`
+
+Open Mercato triggers outbound HTTP calls via the `CALL_WEBHOOK` action in business
+rules and workflows. As of 0.4.4, the platform does not automatically sign these
+requests — there is no managed webhook subscription system with auto-generated secrets.
+
+**Current setup:** Choose a random shared secret yourself, set it in both places:
+
+```bash
+# In your Rails app
+OPEN_MERCATO_WEBHOOK_SECRET=your-random-secret-here
+
+# In the Open Mercato workflow/business rule CALL_WEBHOOK action config,
+# add a custom header:
+# X-OpenMercato-Signature: <compute and set manually, or leave unsigned for now>
+```
+
+If you don't need signature verification (e.g. the webhook endpoint is protected by
+other means), set `webhook_secret` to any value and the engine will still receive and
+route events — signature verification only runs when `webhook_secret` is non-nil and
+the header is present.
 
 ## Error Handling
 
@@ -323,6 +389,12 @@ end
 | Notifications | Notification | `/api/notifications` |
 | Workflows | Definition | `/api/workflows/definitions` |
 | Workflows | Instance | `/api/workflows/instances` |
+| Workflows | Task | `/api/workflows/tasks` |
+| Workflows | Signal | `/api/workflows/signals` (send only) |
+| Sales::Dashboard | NewOrders | `/api/sales/dashboard/widgets/new-orders` |
+| Sales::Dashboard | NewQuotes | `/api/sales/dashboard/widgets/new-quotes` |
+| Translations | Translation | `/api/translations/:entity_type/:entity_id` |
+| Attachments | Library | `/api/attachments/library` |
 | Dictionaries | Dictionary | `/api/dictionaries` |
 | Dictionaries | Entry | `/api/dictionaries/entries` |
 | Auth | User | `/api/auth/users` |
@@ -340,7 +412,11 @@ All resources (except Search::Query) support:
 ### Special Methods
 
 - `Quote.accept(id)`, `Quote.convert_to_order(id)`, `Quote.send_quote(id)`
-- `Workflows::Instance.signal(id, signal_name, payload)`
+- `Workflows::Instance.signal(id, signal_name, payload)`, `Workflows::Instance.advance(id, to_step_id:, trigger_data:, context_updates:)`
+- `Workflows::Task.claim(id)`, `Workflows::Task.complete(id, form_data:, comments:)`
+- `Workflows::Signal.send_signal(correlation_key:, signal_name:, payload:)`
+- `Translations::Translation.find(entity_type, entity_id)`, `.set_translations(entity_type, entity_id, translations:)`, `.destroy(entity_type, entity_id)`
+- `Sales::Dashboard::NewOrders.list(params)`, `Sales::Dashboard::NewQuotes.list(params)`
 - `Search::Query.search(q)`, `Search::Query.global(q)`, `Search::Query.reindex(params)`
 
 ## License
